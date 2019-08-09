@@ -27,7 +27,7 @@ int main(int argc, char const *argv[]) {
     printf("Qual o valor?\n");
     scanf("%f", &r.valor);
 
-    if((fp = fopen("arquivo.bin", "wb")) == NULL) {
+    if((fp = fopen("arquivo.bin", "a+")) == NULL) {
       printf("Erro na abertura do arquivo\n");
       exit(1);
     }
@@ -42,7 +42,7 @@ int main(int argc, char const *argv[]) {
       printf("Erro na escrita do arquivo\n");
     fclose(fp);
 
-    if((fp = fopen("arquivo.bin", "rb")) == NULL)  {
+    if((fp = fopen("arquivo.bin", "r")) == NULL)  {
       printf("Erro na abertura do arquivo");
       exit(1);
     }
@@ -63,8 +63,6 @@ int main(int argc, char const *argv[]) {
       printf("Erro na leitura do arquivo");
     printf("\nO valor: %f", arq.valor);
     fclose(fp);
-
-
 
     printf("Inserir outro registro? (S/N)\n");
     scanf(" %c", &simounao);
