@@ -15,7 +15,6 @@ void writeFile(){
   char simounao;
   FILE *fp;
   registro r;
-
   while (flag == 1) {
 
     printf("Inserindo novo registro!\n\nQual o nome?\n");
@@ -32,14 +31,9 @@ void writeFile(){
       exit(1);
     }
 
-    if(fwrite(r.nome, sizeof(char), 50,fp) !=  50)
+    if (fwrite(&r,sizeof(registro),1,fp) != 1) {
       printf("Erro na escrita do arquivo\n");
-    if(fwrite(r.marca, sizeof(char), 50,fp) !=  50)
-      printf("Erro na escrita do arquivo\n");
-    if(fwrite(r.ean13, sizeof(char), 13,fp) !=  13)
-      printf("Erro na escrita do arquivo\n");
-    if(fwrite(&r.valor, sizeof(float), 1,fp) !=  1)
-      printf("Erro na escrita do arquivo\n");
+    }
     fclose(fp);
 
     printf("Inserir outro registro? (S/N)\n");
@@ -65,28 +59,39 @@ void readFile(){
   }
 
   while( !feof(fp) ){
+    fseek(fp, i*sizeof(arq), SEEK_SET);
+    fread(&arq, sizeof(arq), 1,fp);
 
-    printf("\nRNN: %i", i++);
-
-    if(fread(&arq.nome, sizeof(char), 50,fp) != 50)
-      printf("Erro na leitura do arquivo");
+    printf("\nRNN: %i", i);
     printf("\nO nome: %s", arq.nome);
-
-    if(fread(&arq.marca, sizeof(char), 50,fp) != 50)
-      printf("Erro na leitura do arquivo");
     printf("\nO marca: %s", arq.marca);
-
-    if(fread(&arq.ean13, sizeof(char), 13,fp) != 13)
-      printf("Erro na leitura do arquivo");
     printf("\nO ean13: %s", arq.ean13);
-
-    if(fread(&arq.valor, sizeof(float), 1,fp) != 1)
-      printf("Erro na leitura do arquivo");
     printf("\nO valor: %f\n\n", arq.valor);
-
-    fseek(fp, 117, SEEK_CUR);
-
+    i++;
   }
+
+  fclose(fp);
+
+}
+
+void readFileRNN(int rnn){
+
+  FILE *fp;
+  registro arq;
+
+  if((fp = fopen("arquivo.bin", "r")) == NULL)  {
+    printf("Erro na abertura do arquivo");
+    exit(1);
+  }
+
+  fseek(fp, rnn*sizeof(arq), SEEK_SET);
+  fread(&arq, sizeof(arq), 1,fp);
+
+  printf("\nRNN: %i", rnn);
+  printf("\nO nome: %s", arq.nome);
+  printf("\nO marca: %s", arq.marca);
+  printf("\nO ean13: %s", arq.ean13);
+  printf("\nO valor: %f\n\n", arq.valor);
 
   fclose(fp);
 
@@ -94,11 +99,10 @@ void readFile(){
 
 int main(int argc, char const *argv[]) {
   
-  int opc;
+  int opc,rnn;
   //117 bytes tamanho registro
 
   do{
-
     printf("PROGRAMA DE MANIPULAÇÃO DE ARQUIVO\n\n");
     printf("Escolha a ação:\n 0 - Sair\n 1 - Inserir\n 2 - Ler Todos\n 3 - Ler por RNN\n");
     scanf("%i", &opc);
@@ -111,6 +115,12 @@ int main(int argc, char const *argv[]) {
 
       case 2:
         readFile();
+      break;
+
+      case 3:
+        printf("Qual o RNN: ");
+        scanf("%i",&rnn);
+        readFileRNN(rnn);
       break;
 
     }
