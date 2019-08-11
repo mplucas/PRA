@@ -47,11 +47,12 @@ void writeFile(){
 
 }
 
-void readFile(){
+int readFile(){
 
   int i = 0;
   FILE *fp;
   registro arq;
+  char tempEan[13];
 
   if((fp = fopen("arquivo.bin", "r")) == NULL)  {
     printf("Erro na abertura do arquivo");
@@ -62,21 +63,28 @@ void readFile(){
     fseek(fp, i*sizeof(arq), SEEK_SET);
     fread(&arq, sizeof(arq), 1,fp);
 
+    if (i != 0 && strcmp(tempEan,arq.ean13) == 0) {
+      return 1;
+    }
+
     printf("\nRNN: %i", i);
     printf("\nO nome: %s", arq.nome);
     printf("\nO marca: %s", arq.marca);
     printf("\nO ean13: %s", arq.ean13);
     printf("\nO valor: %f\n\n", arq.valor);
     i++;
+    strncpy(tempEan,arq.ean13 ,sizeof(tempEan));
   }
 
   fclose(fp);
+  return 1;
 
 }
 
 void readFileRNN(int rnn){
 
   FILE *fp;
+  int count;
   registro arq;
 
   if((fp = fopen("arquivo.bin", "r")) == NULL)  {
@@ -84,14 +92,22 @@ void readFileRNN(int rnn){
     exit(1);
   }
 
-  fseek(fp, rnn*sizeof(arq), SEEK_SET);
-  fread(&arq, sizeof(arq), 1,fp);
+  fseek(fp, 0L, SEEK_END);
+  count = ftell(fp)/120;
 
-  printf("\nRNN: %i", rnn);
-  printf("\nO nome: %s", arq.nome);
-  printf("\nO marca: %s", arq.marca);
-  printf("\nO ean13: %s", arq.ean13);
-  printf("\nO valor: %f\n\n", arq.valor);
+  if(count >= rnn+1) {
+
+    fseek(fp, rnn*sizeof(arq), SEEK_SET);
+    fread(&arq, sizeof(arq), 1,fp);
+
+    printf("\nRNN: %i", rnn);
+    printf("\nO nome: %s", arq.nome);
+    printf("\nO marca: %s", arq.marca);
+    printf("\nO ean13: %s", arq.ean13);
+    printf("\nO valor: %f\n\n", arq.valor);
+  } else {
+    printf("O RNN não existe\n\n");
+  }
 
   fclose(fp);
 
