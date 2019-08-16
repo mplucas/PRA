@@ -9,6 +9,24 @@ typedef struct Registro{
   float valor;
 }registro;
 
+int countReg(){
+
+  FILE *fp;
+  int count;
+
+  if ((fp = fopen("arquivo.bin", "r")) == NULL)
+  {
+    printf("Erro na abertura do arquivo");
+    exit(1);
+  }
+
+  fseek(fp, 0L, SEEK_END);
+  count = ftell(fp) / sizeof(registro);
+
+  return count;
+
+}
+
 void writeFile(){
 
   int flag = 1;
@@ -49,31 +67,33 @@ void writeFile(){
 
 int readFile(){
 
-  int i = 0;
+  int i = 0, count;;
   FILE *fp;
   registro arq;
-  char tempEan[13];
+
+  count = countReg();
+
+  if( count == 0 ){
+    printf("Arquivo vazio");
+    return 0;
+  }
 
   if((fp = fopen("arquivo.bin", "r")) == NULL)  {
     printf("Erro na abertura do arquivo");
     exit(1);
   }
 
-  while( !feof(fp) ){
-    fseek(fp, i*sizeof(arq), SEEK_SET);
-    fread(&arq, sizeof(arq), 1,fp);
+  for( i = 0; i < count; i++ ){
 
-    if (i != 0 && strcmp(tempEan,arq.ean13) == 0) {
-      return 1;
-    }
+    fseek(fp, i * sizeof(registro), SEEK_SET);
+    fread(&arq, sizeof(registro), 1,fp);
 
     printf("\nRNN: %i", i);
     printf("\nO nome: %s", arq.nome);
     printf("\nO marca: %s", arq.marca);
     printf("\nO ean13: %s", arq.ean13);
     printf("\nO valor: %f\n\n", arq.valor);
-    i++;
-    strncpy(tempEan,arq.ean13 ,sizeof(tempEan));
+
   }
 
   fclose(fp);
@@ -87,17 +107,17 @@ void readFileRNN(int rnn){
   int count;
   registro arq;
 
+
+  count = countReg();
+
   if((fp = fopen("arquivo.bin", "r")) == NULL)  {
     printf("Erro na abertura do arquivo");
     exit(1);
   }
 
-  fseek(fp, 0L, SEEK_END);
-  count = ftell(fp)/120;
-
   if(count >= rnn+1) {
 
-    fseek(fp, rnn*sizeof(arq), SEEK_SET);
+    fseek(fp, rnn*sizeof(registro), SEEK_SET);
     fread(&arq, sizeof(arq), 1,fp);
 
     printf("\nRNN: %i", rnn);
@@ -113,6 +133,45 @@ void readFileRNN(int rnn){
 
 }
 
+void delByRNN(int rnn)
+{
+
+  FILE *fp;
+  int count;
+  registro arq;
+
+  count = countReg();
+  printf("\n count: %i\n", count);
+
+  if ((fp = fopen("arquivo.bin", "r+")) == NULL)
+  {
+    printf("Erro na abertura do arquivo");
+    exit(1);
+  }
+
+  if (count >= rnn + 1)
+  {
+
+    fseek(fp, rnn * sizeof(registro), SEEK_SET);
+    fread(&arq, sizeof(arq), 1, fp);
+
+    arq.nome[0] = '*';
+
+    fseek(fp, rnn * sizeof(registro), SEEK_SET);
+    if (fwrite(&arq, sizeof(registro), 1, fp) != 1)
+    {
+      printf("Erro na escrita do arquivo\n");
+    }
+
+  }
+  else
+  {
+    printf("O RNN não existe\n\n");
+  }
+
+  fclose(fp);
+}
+
 int main(int argc, char const *argv[]) {
   
   int opc,rnn;
@@ -120,7 +179,7 @@ int main(int argc, char const *argv[]) {
 
   do{
     printf("PROGRAMA DE MANIPULAÇÃO DE ARQUIVO\n\n");
-    printf("Escolha a ação:\n 0 - Sair\n 1 - Inserir\n 2 - Ler Todos\n 3 - Ler por RNN\n");
+    printf("Escolha a ação:\n 0 - Sair\n 1 - Inserir\n 2 - Ler Todos\n 3 - Ler por RNN\n 4 - Excluir por RNN\n");
     scanf("%i", &opc);
     
     switch( opc ){
@@ -137,6 +196,16 @@ int main(int argc, char const *argv[]) {
         printf("Qual o RNN: ");
         scanf("%i",&rnn);
         readFileRNN(rnn);
+      break;
+
+      case 4:
+        printf("Qual o RNN: ");
+        scanf("%i", &rnn);
+        delByRNN(rnn);
+        break;
+
+      default:
+        printf( "Opcao nao existente." );
       break;
 
     }
