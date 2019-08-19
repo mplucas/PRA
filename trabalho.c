@@ -67,7 +67,7 @@ void writeFile(){
 
 int readFile(){
 
-  int i = 0, count;;
+  int i = 0, count, rrn = 0;
   FILE *fp;
   registro arq;
 
@@ -88,11 +88,16 @@ int readFile(){
     fseek(fp, i * sizeof(registro), SEEK_SET);
     fread(&arq, sizeof(registro), 1,fp);
 
-    printf("\nRNN: %i", i);
-    printf("\nO nome: %s", arq.nome);
-    printf("\nO marca: %s", arq.marca);
-    printf("\nO ean13: %s", arq.ean13);
-    printf("\nO valor: %f\n\n", arq.valor);
+    if( arq.nome[0] != '*' ){
+
+        printf("\nRRN: %i", rrn);
+        printf("\nO nome: %s", arq.nome);
+        printf("\nO marca: %s", arq.marca);
+        printf("\nO ean13: %s", arq.ean13);
+        printf("\nO valor: %f\n\n", arq.valor);
+        rrn++;
+
+    }
 
   }
 
@@ -101,12 +106,12 @@ int readFile(){
 
 }
 
-void readFileRNN(int rnn){
+void readFileRRN(int rrn_search){
 
   FILE *fp;
-  int count;
+  int count, i, rrn = 0;
   registro arq;
-
+  int achou = 0;
 
   count = countReg();
 
@@ -115,33 +120,43 @@ void readFileRNN(int rnn){
     exit(1);
   }
 
-  if(count >= rnn+1) {
+  for( i = 0; i < count; i++ ){
 
-    fseek(fp, rnn*sizeof(registro), SEEK_SET);
-    fread(&arq, sizeof(arq), 1,fp);
+    fseek(fp, i * sizeof(registro), SEEK_SET);
+    fread(&arq, sizeof(registro), 1,fp);
 
-    printf("\nRNN: %i", rnn);
-    printf("\nO nome: %s", arq.nome);
-    printf("\nO marca: %s", arq.marca);
-    printf("\nO ean13: %s", arq.ean13);
-    printf("\nO valor: %f\n\n", arq.valor);
-  } else {
-    printf("O RNN não existe\n\n");
+    if( arq.nome[0] != '*' ){
+
+        if( rrn_search == rrn ){
+            printf("\nRRN: %i", rrn_search);
+            printf("\nO nome: %s", arq.nome);
+            printf("\nO marca: %s", arq.marca);
+            printf("\nO ean13: %s", arq.ean13);
+            printf("\nO valor: %f\n\n", arq.valor);
+            achou = 1;
+            break;
+        }
+        rrn++;
+    }
+
+  }
+
+  if( !achou ) {
+    printf("O RRN não existe\n\n");
   }
 
   fclose(fp);
 
 }
 
-void delByRNN(int rnn)
+void delByRRN(int rrn)
 {
 
   FILE *fp;
   int count;
-  registro arq;
+  char aux = '*';
 
   count = countReg();
-  printf("\n count: %i\n", count);
 
   if ((fp = fopen("arquivo.bin", "r+")) == NULL)
   {
@@ -149,16 +164,12 @@ void delByRNN(int rnn)
     exit(1);
   }
 
-  if (count >= rnn + 1)
+  if (count >= rrn + 1)
   {
 
-    fseek(fp, rnn * sizeof(registro), SEEK_SET);
-    fread(&arq, sizeof(arq), 1, fp);
+    fseek(fp, rrn * sizeof(registro), SEEK_SET);
 
-    arq.nome[0] = '*';
-
-    fseek(fp, rnn * sizeof(registro), SEEK_SET);
-    if (fwrite(&arq, sizeof(registro), 1, fp) != 1)
+    if (fwrite(&aux, sizeof(char), 1, fp) != 1)
     {
       printf("Erro na escrita do arquivo\n");
     }
@@ -166,24 +177,24 @@ void delByRNN(int rnn)
   }
   else
   {
-    printf("O RNN não existe\n\n");
+    printf("O RRN não existe\n\n");
   }
 
   fclose(fp);
 }
 
 int main(int argc, char const *argv[]) {
-  
-  int opc,rnn;
+
+  int opc,rrn;
   //117 bytes tamanho registro
 
   do{
     printf("PROGRAMA DE MANIPULAÇÃO DE ARQUIVO\n\n");
-    printf("Escolha a ação:\n 0 - Sair\n 1 - Inserir\n 2 - Ler Todos\n 3 - Ler por RNN\n 4 - Excluir por RNN\n");
+    printf("Escolha a ação:\n 0 - Sair\n 1 - Inserir\n 2 - Ler Todos\n 3 - Ler por RRN\n 4 - Excluir por RRN\n");
     scanf("%i", &opc);
-    
+
     switch( opc ){
-      
+
       case 1:
         writeFile();
       break;
@@ -193,15 +204,15 @@ int main(int argc, char const *argv[]) {
       break;
 
       case 3:
-        printf("Qual o RNN: ");
-        scanf("%i",&rnn);
-        readFileRNN(rnn);
+        printf("Qual o RRN: ");
+        scanf("%i",&rrn);
+        readFileRRN(rrn);
       break;
 
       case 4:
-        printf("Qual o RNN: ");
-        scanf("%i", &rnn);
-        delByRNN(rnn);
+        printf("Qual o RRN: ");
+        scanf("%i", &rrn);
+        delByRRN(rrn);
         break;
 
       default:
