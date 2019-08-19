@@ -79,10 +79,11 @@ int countReg(){
 
 void writeFile(){
 
-  int flag = 1;
+  int flag = 1, topo = getTopo();
   char simounao;
   FILE *fp;
   registro r;
+
   while (flag == 1) {
 
     printf("Inserindo novo registro!\n\nQual o nome?\n");
@@ -94,15 +95,33 @@ void writeFile(){
     printf("Qual o valor?\n");
     scanf("%f", &r.valor);
 
-    if((fp = fopen("arquivo.bin", "a+")) == NULL) {
-      printf("Erro na abertura do arquivo\n");
-      exit(1);
-    }
+    if( topo == -1 ){
 
-    if (fwrite(&r,sizeof(registro),1,fp) != 1) {
-      printf("Erro na escrita do arquivo\n");
+        if((fp = fopen("arquivo.bin", "a+")) == NULL) {
+            printf("Erro na abertura do arquivo\n");
+            exit(1);
+        }
+
+        if (fwrite(&r,sizeof(registro),1,fp) != 1) {
+            printf("Erro na escrita do arquivo\n");
+        }
+        fclose(fp);
+
+    }else{
+
+        if((fp = fopen("arquivo.bin", "r+")) == NULL) {
+            printf("Erro na abertura do arquivo\n");
+            exit(1);
+        }
+
+        fseek(fp, topo * sizeof(registro), SEEK_SET);
+
+        if (fwrite(&r,sizeof(registro),1,fp) != 1) {
+            printf("Erro na escrita do arquivo\n");
+        }
+        fclose(fp);
+
     }
-    fclose(fp);
 
     printf("Inserir outro registro? (S/N)\n");
     scanf(" %c", &simounao);
