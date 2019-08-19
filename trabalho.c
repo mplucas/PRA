@@ -9,6 +9,56 @@ typedef struct Registro{
   float valor;
 }registro;
 
+void createTopo(){
+
+    FILE *fp;
+    int topo = -1;
+
+    if ((fp = fopen("topo.bin", "w")) == NULL)
+    {
+      printf("Erro na abertura do arquivo");
+      exit(1);
+    }
+
+    if (fwrite(&topo,sizeof(int),1,fp) != 1) {
+      printf("Erro na escrita do arquivo\n");
+    }
+
+}
+
+int getTopo(){
+
+    FILE *fp;
+    int topo;
+
+    if ((fp = fopen("topo.bin", "r")) == NULL)
+    {
+      printf("Erro na abertura do arquivo");
+      exit(1);
+    }
+
+    fread(&topo, sizeof(int), 1,fp);
+
+    return topo;
+
+}
+
+void setTopo( int topo ){
+
+    FILE *fp;
+
+    if ((fp = fopen("topo.bin", "w")) == NULL)
+    {
+      printf("Erro na abertura do arquivo");
+      exit(1);
+    }
+
+    if (fwrite(&topo,sizeof(int),1,fp) != 1) {
+      printf("Erro na escrita do arquivo\n");
+    }
+
+}
+
 int countReg(){
 
   FILE *fp;
@@ -106,7 +156,7 @@ int readFile(){
 
 }
 
-void readFileRRN(int rrn_search){
+int searchRRN(int rrn_search){
 
   FILE *fp;
   int count, i, rrn = 0;
@@ -128,11 +178,6 @@ void readFileRRN(int rrn_search){
     if( arq.nome[0] != '*' ){
 
         if( rrn_search == rrn ){
-            printf("\nRRN: %i", rrn_search);
-            printf("\nO nome: %s", arq.nome);
-            printf("\nO marca: %s", arq.marca);
-            printf("\nO ean13: %s", arq.ean13);
-            printf("\nO valor: %f\n\n", arq.valor);
             achou = 1;
             break;
         }
@@ -142,10 +187,42 @@ void readFileRRN(int rrn_search){
   }
 
   if( !achou ) {
-    printf("O RRN não existe\n\n");
+    i = -1;
   }
 
   fclose(fp);
+
+  return i;
+
+}
+
+void readFileRRN(int rrn_search){
+
+    FILE *fp;
+    int pos = searchRRN( rrn_search );
+    registro arq;
+
+    if( pos == -1 ){
+        printf("O RRN não existe\n\n");
+    }else{
+
+        if((fp = fopen("arquivo.bin", "r")) == NULL)  {
+          printf("Erro na abertura do arquivo");
+          exit(1);
+        }
+
+        fseek(fp, pos * sizeof(registro), SEEK_SET);
+        fread(&arq, sizeof(registro), 1,fp);
+
+        printf("\nRRN: %i", rrn_search);
+        printf("\nO nome: %s", arq.nome);
+        printf("\nO marca: %s", arq.marca);
+        printf("\nO ean13: %s", arq.ean13);
+        printf("\nO valor: %f\n\n", arq.valor);
+
+        fclose(fp);
+
+    }
 
 }
 
@@ -153,10 +230,8 @@ void delByRRN(int rrn)
 {
 
   FILE *fp;
-  int count;
+  int topo, rrnReal = searchRRN( rrn );
   char aux = '*';
-
-  count = countReg();
 
   if ((fp = fopen("arquivo.bin", "r+")) == NULL)
   {
@@ -164,19 +239,27 @@ void delByRRN(int rrn)
     exit(1);
   }
 
-  if (count >= rrn + 1)
-  {
+  if (rrnReal != -1) {
 
-    fseek(fp, rrn * sizeof(registro), SEEK_SET);
+    fseek(fp, rrnReal * sizeof(registro), SEEK_SET);
 
     if (fwrite(&aux, sizeof(char), 1, fp) != 1)
     {
       printf("Erro na escrita do arquivo\n");
     }
 
-  }
-  else
-  {
+    topo = getTopo();
+
+    fseek(fp, rrnReal * sizeof(registro) + sizeof(char), SEEK_SET);
+
+    if (fwrite(&topo, sizeof(int), 1, fp) != 1)
+    {
+      printf("Erro na escrita do arquivo\n");
+    }
+
+    setTopo( rrnReal );
+
+  } else {
     printf("O RRN não existe\n\n");
   }
 
@@ -187,6 +270,8 @@ int main(int argc, char const *argv[]) {
 
   int opc,rrn;
   //117 bytes tamanho registro
+
+  createTopo();
 
   do{
     printf("PROGRAMA DE MANIPULAÇÃO DE ARQUIVO\n\n");
