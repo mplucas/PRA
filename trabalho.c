@@ -14,15 +14,41 @@ void createTopo(){
     FILE *fp;
     int topo = -1;
 
-    if ((fp = fopen("topo.bin", "w")) == NULL)
-    {
-      printf("Erro na abertura do arquivo");
-      exit(1);
+    // se topo.bin não existir, o cria
+    if ((fp = fopen("topo.bin", "r")) == NULL){
+
+      if ((fp = fopen("topo.bin", "w")) == NULL)
+      {
+        printf("Erro na abertura do topo 1");
+        exit(1);
+      }
+
+      if (fwrite( &topo, sizeof(int), 1, fp ) != 1) {
+        printf("Erro na escrita do arquivo\n");
+      }
+
     }
 
-    if (fwrite(&topo,sizeof(int),1,fp) != 1) {
-      printf("Erro na escrita do arquivo\n");
+    fclose(fp);
+
+}
+
+void createArq(){
+
+    FILE *fp;
+
+    // se arquivo.bin não existir, o cria
+    if ((fp = fopen("arquivo.bin", "r")) == NULL){
+
+      if ((fp = fopen("arquivo.bin", "w")) == NULL)
+      {
+        printf("Erro na abertura do topo 1");
+        exit(1);
+      }
+
     }
+
+    fclose(fp);
 
 }
 
@@ -33,11 +59,13 @@ int getTopo(){
 
     if ((fp = fopen("topo.bin", "r")) == NULL)
     {
-      printf("Erro na abertura do arquivo");
+      printf("Erro na abertura do topo 2");
       exit(1);
     }
 
     fread(&topo, sizeof(int), 1,fp);
+
+    fclose(fp);
 
     return topo;
 
@@ -49,13 +77,15 @@ void setTopo( int topo ){
 
     if ((fp = fopen("topo.bin", "w")) == NULL)
     {
-      printf("Erro na abertura do arquivo");
+      printf("Erro na abertura do topo 3");
       exit(1);
     }
 
     if (fwrite(&topo,sizeof(int),1,fp) != 1) {
       printf("Erro na escrita do arquivo\n");
     }
+
+    fclose(fp);
 
 }
 
@@ -66,12 +96,14 @@ int countReg(){
 
   if ((fp = fopen("arquivo.bin", "r")) == NULL)
   {
-    printf("Erro na abertura do arquivo");
+    printf("Erro na abertura do arquivo 1");
     exit(1);
   }
 
   fseek(fp, 0L, SEEK_END);
   count = ftell(fp) / sizeof(registro);
+
+  fclose(fp);
 
   return count;
 
@@ -98,7 +130,7 @@ void writeFile(){
     if( topo == -1 ){
 
         if((fp = fopen("arquivo.bin", "a+")) == NULL) {
-            printf("Erro na abertura do arquivo\n");
+            printf("Erro na abertura do arquivo 2\n");
             exit(1);
         }
 
@@ -107,12 +139,15 @@ void writeFile(){
         }
         fclose(fp);
 
+        printf("\n1\n");
+
     }else{
 
         if((fp = fopen("arquivo.bin", "r+")) == NULL) {
-            printf("Erro na abertura do arquivo\n");
+            printf("Erro na abertura do arquivo 3\n");
             exit(1);
         }
+        printf("\nTopo: %i\n", topo );
 
         fseek(fp, topo * sizeof(registro), SEEK_SET);
 
@@ -143,12 +178,12 @@ int readFile(){
   count = countReg();
 
   if( count == 0 ){
-    printf("Arquivo vazio");
+    printf("Arquivo vazio\n");
     return 0;
   }
 
   if((fp = fopen("arquivo.bin", "r")) == NULL)  {
-    printf("Erro na abertura do arquivo");
+    printf("Erro na abertura do arquivo 4");
     exit(1);
   }
 
@@ -161,7 +196,7 @@ int readFile(){
 
         printf("\nRRN: %i", rrn);
         printf("\nO nome: %s", arq.nome);
-        printf("\nO marca: %s", arq.marca);
+        printf("\nA marca: %s", arq.marca);
         printf("\nO ean13: %s", arq.ean13);
         printf("\nO valor: %f\n\n", arq.valor);
         rrn++;
@@ -185,7 +220,7 @@ int searchRRN(int rrn_search){
   count = countReg();
 
   if((fp = fopen("arquivo.bin", "r")) == NULL)  {
-    printf("Erro na abertura do arquivo");
+    printf("Erro na abertura do arquivo 5");
     exit(1);
   }
 
@@ -226,7 +261,7 @@ void readFileRRN(int rrn_search){
     }else{
 
         if((fp = fopen("arquivo.bin", "r")) == NULL)  {
-          printf("Erro na abertura do arquivo");
+          printf("Erro na abertura do arquivo 6");
           exit(1);
         }
 
@@ -254,7 +289,7 @@ void delByRRN(int rrn)
 
   if ((fp = fopen("arquivo.bin", "r+")) == NULL)
   {
-    printf("Erro na abertura do arquivo");
+    printf("Erro na abertura do arquivo 7");
     exit(1);
   }
 
@@ -291,6 +326,7 @@ int main(int argc, char const *argv[]) {
   //117 bytes tamanho registro
 
   createTopo();
+  createArq();
 
   do{
     printf("PROGRAMA DE MANIPULAÇÃO DE ARQUIVO\n\n");
