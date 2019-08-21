@@ -9,6 +9,8 @@ typedef struct Registro{
   float valor;
 }registro;
 
+// Cria o arquivo que conterá o valor do topo da
+// pilha da abordagem dinâmica caso não exista
 void createTopo(){
 
     FILE *fp;
@@ -33,6 +35,7 @@ void createTopo(){
 
 }
 
+// Cria o arquivo que conterá os registros caso não exista
 void createArq(){
 
     FILE *fp;
@@ -42,7 +45,7 @@ void createArq(){
 
       if ((fp = fopen("arquivo.bin", "w")) == NULL)
       {
-        printf("Erro na abertura do topo 1");
+        printf("Erro na abertura do arquivo 0");
         exit(1);
       }
 
@@ -52,6 +55,8 @@ void createArq(){
 
 }
 
+// Retorna o valor do topo da pilha utilizada na
+// abordagem dinâmica
 int getTopo(){
 
     FILE *fp;
@@ -71,6 +76,8 @@ int getTopo(){
 
 }
 
+// Atualiza o arquivo que guarda o valor do topo da pilha
+// utilizada na abordagem dinâmica
 void setTopo( int topo ){
 
     FILE *fp;
@@ -89,6 +96,7 @@ void setTopo( int topo ){
 
 }
 
+// Conta todos os registros do arquivo
 int countReg(){
 
   FILE *fp;
@@ -109,6 +117,8 @@ int countReg(){
 
 }
 
+// adiciona novos registros no arquivo utilizando abordagem
+// dinâmica
 void writeFile(){
 
   int flag = 1, topo = getTopo(), novoTopo;
@@ -148,13 +158,17 @@ void writeFile(){
             exit(1);
         }
 
+        // atualizando topo
         fseek(fp, topo * sizeof(registro) + 1, SEEK_SET);
         fread(&novoTopo, sizeof(int), 1,fp);
         setTopo( novoTopo );
 
+        // atualizando registro
         fseek(fp, topo * sizeof(registro), SEEK_SET);
         if (fwrite(&r,sizeof(registro),1,fp) != 1) {
             printf("Erro na escrita do arquivo\n");
+        }else{
+          printf("Registro inserido.\n");
         }
         fclose(fp);
 
@@ -171,11 +185,12 @@ void writeFile(){
 
 }
 
+// mostra todos os registros não excluidos do arquivo
 int readFile(){
 
   int i = 0, count, rrn = 0;
   FILE *fp;
-  registro arq;
+  registro reg;
 
   count = countReg();
 
@@ -192,15 +207,15 @@ int readFile(){
   for( i = 0; i < count; i++ ){
 
     fseek(fp, i * sizeof(registro), SEEK_SET);
-    fread(&arq, sizeof(registro), 1,fp);
+    fread(&reg, sizeof(registro), 1,fp);
 
-    if( arq.nome[0] != '*' ){
+    if( reg.nome[0] != '*' ){
 
         printf("\nRRN: %i", rrn);
-        printf("\nO nome: %s", arq.nome);
-        printf("\nA marca: %s", arq.marca);
-        printf("\nO ean13: %s", arq.ean13);
-        printf("\nO valor: %f\n\n", arq.valor);
+        printf("\nO nome: %s", reg.nome);
+        printf("\nA marca: %s", reg.marca);
+        printf("\nO ean13: %s", reg.ean13);
+        printf("\nO valor: %f\n\n", reg.valor);
         rrn++;
 
     }
@@ -212,11 +227,14 @@ int readFile(){
 
 }
 
+
+// retorna o 'rrn real' do registro, ex: registro 1 foi excluido
+// logo o registro 2 tem rrn 1, mas seu rrn real é 2
 int searchRRN(int rrn_search){
 
   FILE *fp;
   int count, i, rrn = 0;
-  registro arq;
+  registro reg;
   int achou = 0;
 
   count = countReg();
@@ -229,9 +247,9 @@ int searchRRN(int rrn_search){
   for( i = 0; i < count; i++ ){
 
     fseek(fp, i * sizeof(registro), SEEK_SET);
-    fread(&arq, sizeof(registro), 1,fp);
+    fread(&reg, sizeof(registro), 1,fp);
 
-    if( arq.nome[0] != '*' ){
+    if( reg.nome[0] != '*' ){
 
         if( rrn_search == rrn ){
             achou = 1;
@@ -252,11 +270,12 @@ int searchRRN(int rrn_search){
 
 }
 
+// mostra o registro segundo o rrn
 void readFileRRN(int rrn_search){
 
     FILE *fp;
     int pos = searchRRN( rrn_search );
-    registro arq;
+    registro reg;
 
     if( pos == -1 ){
         printf("O RRN não existe\n\n");
@@ -268,13 +287,13 @@ void readFileRRN(int rrn_search){
         }
 
         fseek(fp, pos * sizeof(registro), SEEK_SET);
-        fread(&arq, sizeof(registro), 1,fp);
+        fread(&reg, sizeof(registro), 1,fp);
 
         printf("\nRRN: %i", rrn_search);
-        printf("\nO nome: %s", arq.nome);
-        printf("\nO marca: %s", arq.marca);
-        printf("\nO ean13: %s", arq.ean13);
-        printf("\nO valor: %f\n\n", arq.valor);
+        printf("\nO nome: %s", reg.nome);
+        printf("\nO marca: %s", reg.marca);
+        printf("\nO ean13: %s", reg.ean13);
+        printf("\nO valor: %f\n\n", reg.valor);
 
         fclose(fp);
 
@@ -282,6 +301,7 @@ void readFileRRN(int rrn_search){
 
 }
 
+// exclui logicamente um registro do arquivo
 void delByRRN(int rrn)
 {
 
@@ -289,30 +309,29 @@ void delByRRN(int rrn)
   int topo, rrnReal = searchRRN( rrn );
   char aux = '*';
 
-  if ((fp = fopen("arquivo.bin", "r+")) == NULL)
-  {
+  if ((fp = fopen("arquivo.bin", "r+")) == NULL){
     printf("Erro na abertura do arquivo 7");
     exit(1);
   }
 
   if (rrnReal != -1) {
 
+    // marcando registro excluido
     fseek(fp, rrnReal * sizeof(registro), SEEK_SET);
-
-    if (fwrite(&aux, sizeof(char), 1, fp) != 1)
-    {
+    if (fwrite(&aux, sizeof(char), 1, fp) != 1){
       printf("Erro na escrita do arquivo\n");
     }
 
+    // adicionando topo no registro excluido para criação da pilha
     topo = getTopo();
-
     fseek(fp, rrnReal * sizeof(registro) + sizeof(char), SEEK_SET);
-
-    if (fwrite(&topo, sizeof(int), 1, fp) != 1)
-    {
+    if (fwrite(&topo, sizeof(int), 1, fp) != 1){
       printf("Erro na escrita do arquivo\n");
+    }else{
+      printf("Registro excluido.\n");
     }
 
+    // atualizando topo
     setTopo( rrnReal );
 
   } else {
@@ -320,6 +339,76 @@ void delByRRN(int rrn)
   }
 
   fclose(fp);
+}
+
+// Cria o arquivo auxiliar para limpar arquivo
+void createArqAux(){
+
+    FILE *fp;
+
+    if ((fp = fopen("arquivoAux.bin", "w")) == NULL)
+    {
+      printf("Erro na abertura do arquivo aux");
+      exit(1);
+    }
+
+    fclose(fp);
+
+}
+
+// função para fazer a remoção fisica de registros
+// do arquivo
+void cleanFile(){
+
+  FILE *fp, *fpAux;
+  int count, i;
+  registro reg;
+
+  createArqAux();
+
+  count = countReg();
+
+  if((fpAux = fopen("arquivoAux.bin", "a+")) == NULL)  {
+    printf("Erro na abertura do arquivo auxiliar 2");
+    exit(1);
+  }
+
+  if((fp = fopen("arquivo.bin", "r")) == NULL)  {
+    printf("Erro na abertura do arquivo 5");
+    exit(1);
+  }
+
+  for( i = 0; i < count; i++ ){
+
+    fseek(fp, i * sizeof(registro), SEEK_SET);
+    fread(&reg, sizeof(registro), 1,fp);
+
+    if( reg.nome[0] != '*' ){
+      if (fwrite(&reg, sizeof(registro), 1, fpAux) != 1){
+        printf("Erro na escrita do arquivo\n");
+      }
+    }
+
+  }
+
+  fclose(fp);
+  fclose(fpAux);
+
+  // exclui o arquivo anterior e renomeia o auxiliar
+  if (remove( "arquivo.bin" ) != 0){
+    printf("arquivo.bin nao deletado\n");
+    perror("Erro");
+  }
+
+  if (rename("arquivoAux.bin", "arquivo.bin") != 0){
+    printf("Erro na renomeacao do arquivo\n");
+  }else{
+    printf("Arquivo limpo\n");
+  }
+
+  // Atualiza topo para -1
+  setTopo(-1);
+
 }
 
 int main(int argc, char const *argv[]) {
@@ -332,7 +421,7 @@ int main(int argc, char const *argv[]) {
 
   do{
     printf("PROGRAMA DE MANIPULAÇÃO DE ARQUIVO\n\n");
-    printf("Escolha a ação:\n 0 - Sair\n 1 - Inserir\n 2 - Ler Todos\n 3 - Ler por RRN\n 4 - Excluir por RRN\n");
+    printf("Escolha a ação:\n 0 - Sair\n 1 - Inserir\n 2 - Ler Todos\n 3 - Ler por RRN\n 4 - Excluir por RRN\n 5 - Limpar arquivo\n");
     scanf("%i", &opc);
 
     switch( opc ){
@@ -355,6 +444,10 @@ int main(int argc, char const *argv[]) {
         printf("Qual o RRN: ");
         scanf("%i", &rrn);
         delByRRN(rrn);
+        break;
+
+      case 5:
+        cleanFile();
         break;
 
       default:
