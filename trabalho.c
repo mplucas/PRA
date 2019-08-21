@@ -111,7 +111,7 @@ int countReg(){
 
 void writeFile(){
 
-  int flag = 1, topo = getTopo();
+  int flag = 1, topo = getTopo(), novoTopo;
   char simounao;
   FILE *fp;
   registro r;
@@ -147,10 +147,12 @@ void writeFile(){
             printf("Erro na abertura do arquivo 3\n");
             exit(1);
         }
-        printf("\nTopo: %i\n", topo );
+
+        fseek(fp, topo * sizeof(registro) + 1, SEEK_SET);
+        fread(&novoTopo, sizeof(int), 1,fp);
+        setTopo( novoTopo );
 
         fseek(fp, topo * sizeof(registro), SEEK_SET);
-
         if (fwrite(&r,sizeof(registro),1,fp) != 1) {
             printf("Erro na escrita do arquivo\n");
         }
