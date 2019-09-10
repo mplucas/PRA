@@ -1,0 +1,1 @@
+(for i in `seq 1 10`; do time ./merge.out;done )2> merge.txt;(for i in `seq 1 10`; do time ./quick.out;done )2> quick.txt;(for i in `seq 1 10`; do time ./heap.out;done )2> heap.txt;
