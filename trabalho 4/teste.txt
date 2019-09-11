@@ -1,1 +1,7 @@
+compilar:
+
+g++ heap.cpp -Wall -o heap.out;g++ merge.cpp -Wall -o merge.out;g++ quick.cpp -Wall -o quick.out
+
+testar:
+
 (for i in `seq 1 10`; do time ./merge.out;done )2> merge.txt;(for i in `seq 1 10`; do time ./quick.out;done )2> quick.txt;(for i in `seq 1 10`; do time ./heap.out;done )2> heap.txt;
