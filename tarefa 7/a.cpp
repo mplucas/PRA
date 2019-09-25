@@ -7,13 +7,34 @@ class TableHash {
     public:
 
     vector<int> v;
-    int m, slot;
+    int m, slots;
+    FILE *fp;
 
-    TableHash( int eme, int slots ){
+    TableHash( int newM, int newSlots ){
 
-        m = eme;
-        slot = slots;
-        v = vector<int>( eme * slots, INT_MAX );
+        m = newM;
+        slots = newSlots;
+        v = vector<int>( newM );
+
+        createArq();
+
+    }
+
+    void createArq(){
+
+        int max = INT_MAX;
+
+        if ((fp = fopen("arquivo.bin", "w")) == NULL)
+        {
+            printf("Erro na criação do arquivo");
+            exit(1);
+        }
+
+        if (fwrite( &max, sizeof(int), m * slots, fp ) != (unsigned)(m * slots)) {
+            printf("Erro na escrita do arquivo\n");
+        }
+
+        fclose(fp);
 
     }
 
@@ -29,10 +50,10 @@ class TableHash {
 
         int bucket = h(value);
         int sign   = signature(value);
-        int index  = bucket * slot;
+        int index  = bucket * slots;
         int change = -1;
 
-        for(int i = index + slot - 1; i >= index; i--){
+        for(int i = index + slots - 1; i >= index; i--){
             if( signature(v[i]) < sign )
                 break;
             change = i;
@@ -40,7 +61,7 @@ class TableHash {
 
         if(change != -1){
 
-            for(int i = index + slot - 1; i > change; i--){
+            for(int i = index + slots - 1; i > change; i--){
                 v[i] = v[i - 1];
             }
 
@@ -50,24 +71,24 @@ class TableHash {
 
     }
 
-    void printTable(){
+    // void printTable(){
 
-        int slots = 0;
+    //     int auxSlots = 0;
 
-        for( auto t:v ){
+    //     for( auto t:v ){
 
-            if( t == INT_MAX )
-                cout << "-\t";
-            else
-                cout << t << "\t";
+    //         if( t == INT_MAX )
+    //             cout << "-\t";
+    //         else
+    //             cout << t << "\t";
 
-            slots++;
-            if(slots == slot){
-                slots = 0;
-                cout << endl;
-            }
-        }
-    }
+    //         auxSlots++;
+    //         if(auxSlots == slots){
+    //             auxSlots = 0;
+    //             cout << endl;
+    //         }
+    //     }
+    // }
 
 };
 
@@ -85,18 +106,7 @@ int main(int argc, char const *argv[])
     }
 
     cout << endl << "Tabela com m = 5:" << endl;
-    table.printTable();
-
-    table = TableHash( 10, 3 );
-
-    for(int i = 0; i < 20; i++){
-
-        table.insert( ((rand() % 100) + 1) * 7 );
-
-    }
-
-    cout << endl << "Tabela com m = 10:" << endl;
-    table.printTable();
-
+    //table.printTable();
+    
     return 0;
 }
