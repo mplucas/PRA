@@ -68,12 +68,18 @@ bool is_numeric(const char *s)
     return isNumeric;
 }
 
-void read_record()
+void convert_data()
 {
 
-    int i = 1;
+    // int i = 1;
     // File pointer
     fstream fin;
+
+    // reseting file
+    FILE *out = fopen("games.bin", "w");
+    fclose(out);
+
+    out = fopen("games.bin", "a");
 
     // Open an existing file
     fin.open("dados.csv", ios::in);
@@ -85,7 +91,7 @@ void read_record()
 
     // tirar o cabecalho
     getline(fin, line);
-    i++;
+    // i++;
 
     while (getline(fin, line)) {
 
@@ -113,15 +119,15 @@ void read_record()
         Game aux;
 
         // cout << row[0] <<  endl;
-        if(!is_numeric(row[0].c_str()))
-            cout << "erro0: '" << row[0] << "', linha: " << i << endl;
+        // if(!is_numeric(row[0].c_str()))
+        //     cout << "erro0: '" << row[0] << "', linha: " << i << endl;
         aux.id = stoul(row[0]);
         aux.name = row[1];
         aux.subtitle = row[2];
         // cout << row[3] <<  endl;
         aux.avgRate = stof(row[3]);
-        if(!is_numeric(row[4].c_str()))
-            cout << "erro4: '" << row[4] << "', linha: " << i << endl;
+        // if(!is_numeric(row[4].c_str()))
+        //     cout << "erro4: '" << row[4] << "', linha: " << i << endl;
         aux.countRate = stoul(row[4]);
         // cout << row[5] <<  endl;
         aux.price = stof(row[5]);
@@ -130,28 +136,53 @@ void read_record()
         aux.developer = row[8];
         aux.age = row[9];
         aux.languages = row[10];
-        if(!is_numeric(row[11].c_str()))
-            cout << "erro11: '" << row[11] << "', linha: " << i << endl;
+        // if(!is_numeric(row[11].c_str()))
+        //     cout << "erro11: '" << row[11] << "', linha: " << i << endl;
         aux.size = stoul(row[11]);
         aux.primaryGenre = row[12];
         aux.genres = row[13];
         aux.originalRelease = row[14];
         aux.lastRelease = row[15];
-        if(!is_numeric(row[16].c_str()))
-            cout << "erro16: '" << row[16] << "', linha: " << i << endl;
+        // if(!is_numeric(row[16].c_str()))
+        //     cout << "erro16: '" << row[16] << "', linha: " << i << endl;
         aux.rank = stoul(row[16]);
 
         printGame(aux);
-        cout << i <<  endl;
-        i++;
+        // cout << i <<  endl;
+        // i++;
+
+        if (fwrite(&aux,sizeof(Game),1,out) != 1) {
+            printf("Erro na escrita do arquivo\n");
+        }
+
     }
+
+    fclose(out);
+}
+
+void dumpFile(){
+
+    FILE *f = fopen("games.bin","r");
+
+    Game aux;
+
+    while(fread(&aux, sizeof(game), 1,f) == 1){
+
+        printGame(aux);
+
+    }
+
+    fclose(f);
+
 }
 
 int main(int argc, char const *argv[])
 {
     setbuf(stdin, NULL);
 
-    read_record();
+    convert_data();
+
+    //dumpFile();
 
     return 0;
 }
