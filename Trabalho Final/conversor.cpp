@@ -1,25 +1,26 @@
 #include<bits/stdc++.h>
+#include <cstring>
 
 using namespace std;
 
 typedef struct game
 {
     unsigned int id;
-    string name;
-    string subtitle;
+    char name[100];
+    char subtitle[100];
     float avgRate;
     unsigned int countRate;
     float price;
-    string purchases;
-    string description;
-    string developer;
-    string age;
-    string languages;
+    char purchases[500];
+    char description[10000];
+    char developer[100];
+    char age[10];
+    char languages[300];
     unsigned long int size;
-    string primaryGenre;
-    string genres;
-    string originalRelease;
-    string lastRelease;
+    char primaryGenre[100];
+    char genres[300];
+    char originalRelease[15];
+    char lastRelease[15];
     unsigned int rank;
 } Game;
 
@@ -71,18 +72,18 @@ bool is_numeric(const char *s)
 void convert_data()
 {
 
-    // int i = 1;
+    int i = 1;
     // File pointer
     fstream fin;
 
-    // reseting file
-    FILE *out = fopen("games.bin", "w");
-    fclose(out);
-
-    out = fopen("games.bin", "a");
-
     // Open an existing file
     fin.open("dados.csv", ios::in);
+
+    // reseting file
+    FILE *f = fopen("games.bin", "w");
+    fclose(f);
+
+    f = fopen("games.bin", "a");
 
     // Read the Data from the file
     // as String Vector
@@ -91,7 +92,7 @@ void convert_data()
 
     // tirar o cabecalho
     getline(fin, line);
-    // i++;
+    i++;
 
     while (getline(fin, line)) {
 
@@ -122,53 +123,78 @@ void convert_data()
         // if(!is_numeric(row[0].c_str()))
         //     cout << "erro0: '" << row[0] << "', linha: " << i << endl;
         aux.id = stoul(row[0]);
-        aux.name = row[1];
-        aux.subtitle = row[2];
+        cout << "a" << endl;
+        strcpy(aux.name, row[1].c_str());
+        cout << "b" << endl;
+        strcpy(aux.subtitle, row[2].c_str());
+        cout << "c" << endl;
         // cout << row[3] <<  endl;
         aux.avgRate = stof(row[3]);
+        cout << "d" << endl;
         // if(!is_numeric(row[4].c_str()))
         //     cout << "erro4: '" << row[4] << "', linha: " << i << endl;
         aux.countRate = stoul(row[4]);
+        cout << "e" << endl;
         // cout << row[5] <<  endl;
         aux.price = stof(row[5]);
-        aux.purchases = row[6];
-        aux.description = row[7];
-        aux.developer = row[8];
-        aux.age = row[9];
-        aux.languages = row[10];
+        cout << "f" << endl;
+        strcpy(aux.purchases, row[6].c_str());
+        cout << "g" << endl;
+        strcpy(aux.description, row[7].c_str());
+        cout << "h" << endl;
+        strcpy(aux.developer, row[8].c_str());
+        cout << "i" << endl;
+        strcpy(aux.age, row[9].c_str());
+        cout << "j" << endl;
+        strcpy(aux.languages, row[10].c_str());
+        cout << "k" << endl;
         // if(!is_numeric(row[11].c_str()))
         //     cout << "erro11: '" << row[11] << "', linha: " << i << endl;
         aux.size = stoul(row[11]);
-        aux.primaryGenre = row[12];
-        aux.genres = row[13];
-        aux.originalRelease = row[14];
-        aux.lastRelease = row[15];
+        cout << "l" << endl;
+        strcpy(aux.primaryGenre, row[12].c_str());
+        cout << "m" << endl;
+        strcpy(aux.genres, row[13].c_str());
+        cout << "n" << endl;
+        strcpy(aux.originalRelease, row[14].c_str());
+        cout << "p" << endl;
+        strcpy(aux.lastRelease, row[15].c_str());
+        cout << "q" << endl;
         // if(!is_numeric(row[16].c_str()))
         //     cout << "erro16: '" << row[16] << "', linha: " << i << endl;
         aux.rank = stoul(row[16]);
+        cout << "r" << endl;
 
-        printGame(aux);
-        // cout << i <<  endl;
-        // i++;
+        // printGame(aux);
+        cout << i <<  endl;
+        i++;
 
-        if (fwrite(&aux,sizeof(Game),1,out) != 1) {
+        if (fwrite(&aux,sizeof(Game),1,f) != 1) {
             printf("Erro na escrita do arquivo\n");
         }
 
     }
 
-    fclose(out);
+    fin.close();
+    cout << "s" << endl;
+
+    fclose(f);
+    cout << "t" << endl;
 }
 
 void dumpFile(){
 
+    cout << "u" << endl;
     FILE *f = fopen("games.bin","r");
+    cout << "v" << endl;
 
     Game aux;
 
     while(fread(&aux, sizeof(game), 1,f) == 1){
 
+        cout << "x" << endl;
         printGame(aux);
+        cout << "z" << endl;
 
     }
 
@@ -180,9 +206,9 @@ int main(int argc, char const *argv[])
 {
     setbuf(stdin, NULL);
 
-    convert_data();
+    //convert_data();
 
-    //dumpFile();
+    dumpFile();
 
     return 0;
 }
